@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MR Digest — {{ date_str }}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: #f4f4ef;
+      font-family: Georgia, 'Times New Roman', serif;
+      color: #1a1a1a;
+      -webkit-text-size-adjust: 100%;
+    }
+    .container {
+      max-width: 620px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+    }
+    .header {
+      background: #16213e;
+      color: #e8e8e0;
+      padding: 28px 36px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: normal;
+      letter-spacing: 0.4px;
+    }
+    .header .date-line {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: #8888aa;
+      font-family: -apple-system, Helvetica Neue, Arial, sans-serif;
+    }
+    .post-count {
+      display: inline-block;
+      margin-left: 10px;
+      background: #2a3a5e;
+      color: #aab;
+      border-radius: 10px;
+      padding: 1px 8px;
+      font-size: 11px;
+    }
+    .posts {
+      padding: 4px 0;
+    }
+    .post {
+      padding: 26px 36px;
+      border-bottom: 1px solid #eeede8;
+    }
+    .post:last-child {
+      border-bottom: none;
+    }
+    .post-title {
+      margin: 0 0 6px;
+      font-size: 17px;
+      font-weight: bold;
+      line-height: 1.35;
+    }
+    .post-title a {
+      color: #16213e;
+      text-decoration: none;
+    }
+    .post-title a:hover {
+      text-decoration: underline;
+    }
+    .post-meta {
+      font-family: -apple-system, Helvetica Neue, Arial, sans-serif;
+      font-size: 11.5px;
+      color: #999;
+      margin: 0 0 14px;
+    }
+    .post-summary {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #2d2d2d;
+      margin: 0 0 14px;
+    }
+    .post-summary p {
+      margin: 0 0 10px;
+    }
+    .post-summary p:last-child {
+      margin-bottom: 0;
+    }
+    .post-summary blockquote {
+      margin: 10px 0;
+      padding: 6px 14px;
+      border-left: 3px solid #ccc;
+      color: #555;
+      font-style: italic;
+    }
+    .post-summary ul, .post-summary ol {
+      margin: 0 0 10px;
+      padding-left: 22px;
+    }
+    .read-more a {
+      font-family: -apple-system, Helvetica Neue, Arial, sans-serif;
+      font-size: 12px;
+      color: #4466bb;
+      text-decoration: none;
+    }
+    .read-more a:hover {
+      text-decoration: underline;
+    }
+    .no-posts {
+      padding: 40px 36px;
+      text-align: center;
+      color: #999;
+      font-style: italic;
+    }
+    .footer {
+      background: #f8f8f4;
+      border-top: 1px solid #eeede8;
+      padding: 14px 36px;
+      font-family: -apple-system, Helvetica Neue, Arial, sans-serif;
+      font-size: 11px;
+      color: #bbb;
+      text-align: center;
+    }
+    .footer a {
+      color: #aaa;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <h1>Marginal Revolution</h1>
+      <div class="date-line">
+        Daily Digest &middot; {{ date_str }}
+        <span class="post-count">{{ posts | length }} post{{ 's' if posts | length != 1 else '' }}</span>
+      </div>
+    </div>
+
+    <div class="posts">
+      {% if posts %}
+        {% for post in posts %}
+        <div class="post">
+          <h2 class="post-title">
+            <a href="{{ post.url }}">{{ post.title }}</a>
+          </h2>
+          <div class="post-meta">
+            {{ post.published.strftime('%-I:%M %p UTC') }}
+            {%- if post.author %} &middot; {{ post.author }}{% endif %}
+          </div>
+          <div class="post-summary">{{ post.summary | safe }}</div>
+          <div class="read-more">
+            <a href="{{ post.url }}">Read on Marginal Revolution &rarr;</a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="no-posts">No new posts today.</div>
+      {% endif %}
+    </div>
+
+    <div class="footer">
+      Generated {{ generated_at.strftime('%Y-%m-%d %H:%M UTC') }}
+      &middot;
+      <a href="https://marginalrevolution.com">marginalrevolution.com</a>
+    </div>
+
+  </div>
+</body>
+</html>
