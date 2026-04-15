@@ -14,7 +14,6 @@ A self-hosted daily email digest for [Marginal Revolution](https://marginalrevol
 
 - Python 3.10+
 - A Gmail account with 2-Step Verification enabled (for the App Password)
-- The `claude` CLI installed and authenticated (used by `run.sh` to activate the correct environment — no API calls are made to Claude)
 
 ## Setup
 
