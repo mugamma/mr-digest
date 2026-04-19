@@ -1,0 +1,8 @@
+[Unit]
+Description=MR Digest — daily Marginal Revolution email digest
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=@SCRIPT_DIR@/run.sh

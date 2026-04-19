@@ -1,0 +1,10 @@
+[Unit]
+Description=MR Digest — daily 4 PM timer (catches up missed runs)
+
+[Timer]
+OnCalendar=*-*-* 16:00:00
+Persistent=true
+Unit=mr-digest.service
+
+[Install]
+WantedBy=timers.target

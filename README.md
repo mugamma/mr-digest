@@ -1,6 +1,6 @@
 # MR Digest
 
-A self-hosted daily email digest for [Marginal Revolution](https://marginalrevolution.com). Runs as a cron job, fetches new posts via RSS, extracts a formatted excerpt from each one, and mails you a clean HTML digest.
+A self-hosted daily email digest for [Marginal Revolution](https://marginalrevolution.com). Runs on a systemd user timer, fetches new posts via RSS, extracts a formatted excerpt from each one, and mails you a clean HTML digest. Missed runs (e.g. the laptop was asleep at the scheduled time) are caught up as soon as the machine is back on.
 
 ## How it works
 
@@ -12,6 +12,7 @@ A self-hosted daily email digest for [Marginal Revolution](https://marginalrevol
 
 ## Requirements
 
+- Linux with systemd (user-level timers)
 - Python 3.10+
 - A Gmail account with 2-Step Verification enabled (for the App Password)
 
@@ -26,7 +27,7 @@ bash setup.sh
 `setup.sh` will:
 - Create a Python virtual environment and install dependencies
 - Copy `.env.example` to `.env` if it doesn't exist yet
-- Install a cron job that runs the digest daily at 4:00 PM local time
+- Install a systemd user timer that runs the digest daily at 4:00 PM local time, with `Persistent=true` so missed runs (laptop asleep, powered off, etc.) fire as soon as the machine is back up
 
 Then edit `.env` with your credentials:
 
@@ -49,6 +50,15 @@ bash run.sh
 tail -f logs/digest.log
 ```
 
+## Timer management
+
+```bash
+systemctl --user list-timers mr-digest.timer   # next scheduled run
+systemctl --user status mr-digest.service      # last run status
+systemctl --user start mr-digest.service       # trigger now
+systemctl --user disable --now mr-digest.timer # stop scheduling
+```
+
 ## Files
 
 ```
@@ -56,7 +66,10 @@ digest.py          — fetches posts, extracts excerpts, builds the digest
 mailer.py          — sends the digest via Gmail SMTP
 templates/
   digest.html      — Jinja2 HTML email template
-run.sh             — cron wrapper (activates venv, runs digest, logs output)
+systemd/
+  mr-digest.service.in — service unit template (SCRIPT_DIR substituted at install)
+  mr-digest.timer  — timer unit (daily 4 PM, Persistent=true)
+run.sh             — wrapper (activates venv, runs digest, logs output)
 setup.sh           — one-time setup script
 requirements.txt   — Python dependencies
 .env.example       — template for required environment variables
@@ -72,4 +85,4 @@ All configuration lives in `.env` (never committed):
 | `GMAIL_APP_PASSWORD` | 16-character Gmail App Password |
 | `DIGEST_TO_EMAIL` | Address where the digest is delivered |
 
-The cron schedule (`0 16 * * *`) and excerpt length (1000 characters) can be adjusted in `setup.sh` and `digest.py` respectively.
+The schedule (`OnCalendar=*-*-* 16:00:00`) can be adjusted in `systemd/mr-digest.timer`, and the excerpt length (1000 characters) in `digest.py`.
