@@ -59,6 +59,17 @@ systemctl --user start mr-digest.service       # trigger now
 systemctl --user disable --now mr-digest.timer # stop scheduling
 ```
 
+### Headless machines
+
+systemd user units only run while your user is logged in. On a normal
+desktop/laptop where you log in on boot this is seamless. On a headless
+machine where no one logs in interactively, enable lingering so the user
+manager starts at boot:
+
+```bash
+sudo loginctl enable-linger $USER
+```
+
 ## Files
 
 ```
