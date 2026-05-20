@@ -1,8 +1,8 @@
 [Unit]
-Description=MR Digest — daily 4 PM timer (catches up missed runs)
+Description=MR Digest — hourly check, sends digest if 24 h have elapsed
 
 [Timer]
-OnCalendar=*-*-* 16:00:00
+OnCalendar=hourly
 Persistent=true
 Unit=mr-digest.service
 

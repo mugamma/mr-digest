@@ -155,6 +155,12 @@ def main() -> None:
 
     log.info("Last run: %s", last_run or "never (first run)")
 
+    if last_run is not None:
+        elapsed = run_time - datetime.fromisoformat(last_run)
+        if elapsed.total_seconds() < 86400:
+            log.info("Last digest was %.1f hours ago — skipping.", elapsed.total_seconds() / 3600)
+            return
+
     tmp_dir = Path(f"/tmp/mr-digest-{run_time.strftime('%Y%m%d-%H%M%S')}")
     tmp_dir.mkdir(parents=True)
     log.info("Working directory: %s", tmp_dir)

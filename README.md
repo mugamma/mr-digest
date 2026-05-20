@@ -1,6 +1,6 @@
 # MR Digest
 
-A self-hosted daily email digest for [Marginal Revolution](https://marginalrevolution.com). Runs on a systemd user timer, fetches new posts via RSS, extracts a formatted excerpt from each one, and mails you a clean HTML digest. Missed runs (e.g. the laptop was asleep at the scheduled time) are caught up as soon as the machine is back on.
+A self-hosted daily email digest for [Marginal Revolution](https://marginalrevolution.com). Runs on a systemd user timer (every hour), fetches new posts via RSS, extracts a formatted excerpt from each one, and mails you a clean HTML digest. The script only sends a digest if 24 hours have passed since the last one, so the hourly timer is just the check-in frequency — you still get at most one digest per day, delivered within an hour of whenever your machine is on.
 
 ## How it works
 
@@ -27,7 +27,7 @@ bash setup.sh
 `setup.sh` will:
 - Create a Python virtual environment and install dependencies
 - Copy `.env.example` to `.env` if it doesn't exist yet
-- Install a systemd user timer that runs the digest daily at 4:00 PM local time, with `Persistent=true` so missed runs (laptop asleep, powered off, etc.) fire as soon as the machine is back up
+- Install a systemd user timer that checks every hour (`Persistent=true` so missed checks catch up on wake), sending a digest only when 24 hours have elapsed since the last one
 
 Then edit `.env` with your credentials:
 
@@ -96,4 +96,4 @@ All configuration lives in `.env` (never committed):
 | `GMAIL_APP_PASSWORD` | 16-character Gmail App Password |
 | `DIGEST_TO_EMAIL` | Address where the digest is delivered |
 
-The schedule (`OnCalendar=*-*-* 16:00:00`) can be adjusted in `systemd/mr-digest.timer`, and the excerpt length (1000 characters) in `digest.py`.
+The check interval (`OnCalendar=hourly`) and the minimum gap between digests (24 h, hardcoded as `86400` seconds in `digest.py`) can be adjusted independently. The excerpt length (1000 characters) is also in `digest.py`.
