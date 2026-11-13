@@ -142,6 +142,30 @@ def build_digest_html(posts: list, run_time: datetime) -> str:
     )
 
 
+FAILURE_ALERT_INTERVAL_SECONDS = 86400
+
+
+def notify_failure(state: dict, run_time: datetime, message: str) -> None:
+    """Email a failure notice, at most once per FAILURE_ALERT_INTERVAL_SECONDS,
+    so the hourly timer doesn't spam while a problem persists."""
+    last_alert = state.get("last_failure_alert")
+    if last_alert is not None:
+        elapsed = run_time - datetime.fromisoformat(last_alert)
+        if elapsed.total_seconds() < FAILURE_ALERT_INTERVAL_SECONDS:
+            log.info("Failure alert already sent %.1f hours ago — not resending.",
+                     elapsed.total_seconds() / 3600)
+            return
+
+    from mailer import send_failure_notice
+
+    try:
+        send_failure_notice(message, run_time)
+    except Exception as exc:
+        log.error("Failed to send failure notice: %s", exc)
+        return
+    save_state({**state, "last_failure_alert": run_time.isoformat()})
+
+
 def main() -> None:
     logging.basicConfig(
         level=logging.INFO,
@@ -178,7 +202,12 @@ def main() -> None:
     for i, (entry, published) in enumerate(new_posts):
         log.info("[%d/%d] %s", i + 1, len(new_posts), entry.title)
         try:
-            raw_html = fetch_post_html(entry.link)
+            # Prefer the full post body embedded in the feed (content:encoded);
+            # MR now returns 403 for direct article fetches by scripts.
+            if getattr(entry, "content", None):
+                raw_html = f'<div class="entry-content">{entry.content[0].value}</div>'
+            else:
+                raw_html = fetch_post_html(entry.link)
             (tmp_dir / f"post_{i+1:02d}_raw.html").write_text(raw_html, encoding="utf-8")
 
             excerpt = extract_excerpt(raw_html)
@@ -198,6 +227,11 @@ def main() -> None:
 
     if not digest_posts:
         log.error("All posts failed to process. Aborting.")
+        notify_failure(
+            state,
+            run_time,
+            f"All {len(new_posts)} new post(s) failed to process, so no digest was sent.",
+        )
         sys.exit(1)
 
     html = build_digest_html(digest_posts, run_time)
